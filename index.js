@@ -8,29 +8,19 @@ const port = 3000;
 
 app.use(express.urlencoded({ extended: true })); 
 
-// const db = new pg.Client({
-//     user: process.env.PG_USER,
-//     host: "localhost",
-//     database: "BooksNotes",
-//     password: process.env.PG_PASSWORD,
-//     port: 5432,
-// });
-// db.connect();
-
-let books = [
-    { id: 1, title: "Harry Potter and the Deathly Hallows", author: "J.K. Rowling", notes: "Amazing book!", rating: 9, read_date: new Date("2014-08-19"), isbn: "9781408855713" },
-    { id: 2, title: "Harry Potter and the Half-Blood Prince", author: "J.K. Rowling", notes: "Nice book", rating: 7, read_date: new Date("2017-07-06"), isbn: "9781408855706" },
-    { id: 3, title: "Harry Potter and the Prisoner of Azkaban", author: "J.K. Rowling", notes: "Very interesting!", rating: 8, read_date: new Date("2020-01-21"), isbn: "9781408855676" }
-];
-
-let counter = 3;
+const db = new pg.Client({
+    user: process.env.PG_USER,
+    host: "localhost",
+    database: "BooksNotes",
+    password: process.env.PG_PASSWORD,
+    port: 5432,
+});
+db.connect();
 
 app.get("/", async (req, res) => {
     try {
-        for (const book of books) {
-            const cover = await axios.get(`https://covers.openlibrary.org/b/isbn/${book.isbn}-M.jpg`);
-            book.cover = cover;
-        }
+        const result = await db.query('SELECT * FROM books');
+        const books = result.rows;
         
         res.render("index.ejs", {
             booksList: books,
@@ -44,55 +34,64 @@ app.get('/add-book', (req, res) => {
     res.render('add-book.ejs');
 });
 
-app.post('/submit-book', (req, res) => {
-    const newBook = {
-        id: ++counter,
-        title: req.body.title,
-        author: req.body.author,
-        notes: req.body.notes,
-        rating: req.body.rating,
-        read_date: new Date(req.body.read_date),
-        isbn: req.body.isbn,
-    }
+app.post('/submit-book', async (req, res) => {
+    const { title, author, notes, rating, read_date, isbn } = req.body;
 
-    books.push(newBook);
-    res.redirect('/');
-});
+    try {
+        const coverResponse = await axios.get(`https://covers.openlibrary.org/b/isbn/${isbn}-M.jpg`, { responseType: 'stream' });
+        const coverUrl = coverResponse.config.url;
 
-app.get('/edit/:id', (req, res) => {
-    const bookId = parseInt(req.params.id, 10);
-    const bookToEdit = books.find(book => book.id === bookId);
-    if (bookToEdit) {
-        res.render('edit-book.ejs', { book: bookToEdit });
-    } else {
-        res.status(404).send('Book not found');
-    }
-});
-
-app.post('/edit/:id', (req, res) => {
-    const bookId = parseInt(req.params.id, 10);
-    const bookIndex = books.findIndex(book => book.id === bookId);
-    
-    if (bookIndex > -1) {
-        books[bookIndex] = {
-            ...books[bookIndex],
-            title: req.body.title,
-            author: req.body.author,
-            notes: req.body.notes,
-            rating: req.body.rating,
-            read_date: new Date(req.body.read_date),
-            isbn: req.body.isbn,
-        };
+        await db.query('INSERT INTO books (title, author, notes, rating, read_date, isbn, cover) VALUES ($1, $2, $3, $4, $5, $6, $7)', 
+            [title, author, notes, rating, read_date, isbn, coverUrl]
+        );
+        
         res.redirect('/');
-    } else {
-        res.status(404).send('Book not found');
+    } catch (error) {
+        console.log(error);
     }
 });
 
-app.post('/delete/:id', (req, res) => {
-    const bookId = parseInt(req.params.id, 10);
-    books = books.filter(book => book.id !== bookId);
-    res.redirect('/');
+app.get('/edit/:id', async (req, res) => {
+    const bookId = req.params.id;
+
+    try {
+        const bookToEdit = await db.query('SELECT * FROM books WHERE id = $1', [bookId]);
+    
+        if (bookToEdit.rows && bookToEdit.rows.length > 0) {
+          const book = bookToEdit.rows[0];
+    
+          res.render('edit-book.ejs', { book: book });
+        } else {
+          res.status(404).send('Book not found');
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('An error occurred');
+    }
+});
+
+app.post('/edit/:id', async (req, res) => {
+    const bookId = req.params.id;
+    const { title, author, notes, rating, read_date, isbn } = req.body;
+
+    try {
+        await db.query(`UPDATE books SET title = $1, author = $2, notes = $3, rating = $4, read_date = $5, isbn = $6 WHERE id = $7`, [title, author, notes, rating, read_date, isbn, bookId]);
+
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error updating book', error.stack);
+    }
+});
+
+app.post('/delete/:id', async (req, res) => {
+    const bookId = req.params.id;
+    try {
+        await db.query(`DELETE FROM books WHERE id = $1`, [bookId]);
+
+        res.redirect('/');
+    } catch (error) {
+        console.error('Error updating book', error.stack);
+    }
 });
 
 app.listen(port, () => {

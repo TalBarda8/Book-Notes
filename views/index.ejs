@@ -19,7 +19,7 @@
         <p><%= book.rating %></p>
         <p><%= ("0" + book.read_date.getDate()).slice(-2) %>/<%= ("0" + (book.read_date.getMonth() + 1)).slice(-2) %>/<%= book.read_date.getFullYear() %></p>
         <p><%= book.isbn %></p>
-        <img src="<%= book.cover.config.url %>" alt="book's cover"/>
+        <img src="<%= book.cover %>" alt="book's cover"/>
         <form action="/edit/<%= book.id %>" method="GET">
             <button type="submit">Edit</button>
         </form>
