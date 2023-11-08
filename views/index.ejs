@@ -6,6 +6,15 @@
     <title>Document</title>
 </head>
 <body>
-    
+    <h1>Welcome to the digital bookshelf</h1>
+    <% locals.booksList.forEach(book => { %>
+        <h2><%= book.title %></h2>
+        <h3>By <%= book.author %></h3>
+        <p><%= book.notes %></p>
+        <p><%= book.rating %></p>
+        <p><%= ("0" + book.read_date.getDate()).slice(-2) %>/<%= ("0" + (book.read_date.getMonth() + 1)).slice(-2) %>/<%= book.read_date.getFullYear() %></p>
+        <p><%= book.isbn %></p>
+        <img src="<%= book.cover.config.url %>" alt="book's cover"/>
+    <% }); %>
 </body>
 </html>
