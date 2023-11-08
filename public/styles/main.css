@@ -1,0 +1,82 @@
+/* styles/main.css */
+body {
+    font-family: 'Arial', sans-serif;
+    background-color: #f0f0f0;
+    margin: 0;
+    padding: 20px;
+    color: #333;
+    text-align: center; /* Aligns text to the center */
+}
+
+.container {
+    max-width: 1200px;
+    margin: auto; /* This will center the content */
+}
+
+h1 {
+    color: #5D1049;
+}
+
+form {
+    margin-bottom: 40px;
+    display: inline-block; /* Align forms to be inline */
+    width: auto;
+}
+
+input, textarea, button {
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    display: block; /* Make form elements stack vertically */
+}
+
+button {
+    background-color: #5D1049;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+button:hover {
+    background-color: #7A1F5C;
+}
+
+.book-container {
+    background-color: #ffffff;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    padding: 20px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+}
+
+.book-details {
+    text-align: left;
+}
+
+img {
+    max-width: 150px;
+    margin-right: 20px;
+    border-radius: 4px;
+}
+
+.form-container {
+    width: 50%;
+    margin: 20px auto; /* Center form and give it space from top and bottom */
+}
+
+@media (max-width: 768px) {
+    .book-container {
+        flex-direction: column;
+    }
+
+    .form-container {
+        width: 90%;
+    }
+}

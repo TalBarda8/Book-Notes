@@ -3,29 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="styles/main.css" />
     <title>Book Shelf</title>
 </head>
 <body>
-    <h1>Welcome to the digital bookshelf</h1>
+    <div class="container">
+        <h1>Welcome to the digital bookshelf</h1>
 
-    <form action="/add-book" method="GET">
-        <button type="submit">Add Book</button>
-    </form>
+        <form action="/add-book" method="GET" class="form-action">
+            <button type="submit">Add Book</button>
+        </form>
 
-    <% locals.booksList.forEach(book => { %>
-        <h2><%= book.title %></h2>
-        <h3>By <%= book.author %></h3>
-        <p><%= book.notes %></p>
-        <p><%= book.rating %></p>
-        <p><%= ("0" + book.read_date.getDate()).slice(-2) %>/<%= ("0" + (book.read_date.getMonth() + 1)).slice(-2) %>/<%= book.read_date.getFullYear() %></p>
-        <p><%= book.isbn %></p>
-        <img src="<%= book.cover %>" alt="book's cover"/>
-        <form action="/edit/<%= book.id %>" method="GET">
-            <button type="submit">Edit</button>
-        </form>
-        <form action="/delete/<%= book.id %>" method="POST">
-            <button type="submit">Delete</button>
-        </form>
-    <% }); %>
+        <% locals.booksList.forEach(book => { %>
+            <div class="book-container">
+                <img src="<%= book.cover %>" alt="book's cover"/>
+                <div class="book-details">
+                    <h2><%= book.title %></h2>
+                    <h3>By <%= book.author %></h3>
+                    <p><%= book.notes %></p>
+                    <p><strong>Rating:</strong> <%= book.rating %>/10</p>
+                    <p><strong>Date read:</strong> <%= ("0" + book.read_date.getDate()).slice(-2) %>/<%= ("0" + (book.read_date.getMonth() + 1)).slice(-2) %>/<%= book.read_date.getFullYear() %></p>
+                    <p><strong>ISBN:</strong> <%= book.isbn %></p>
+                    <form action="/edit/<%= book.id %>" method="GET">
+                        <button type="submit">Edit</button>
+                    </form>
+                    <form action="/delete/<%= book.id %>" method="POST">
+                        <button type="submit">Delete</button>
+                    </form>
+                </div>
+            </div>
+        <% }); %>
+    </div>
 </body>
 </html>
